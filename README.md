@@ -58,14 +58,11 @@ npm i @kangc/v-md-editor@next -S
 
 [需要了解如何使用Vue3中使用markdown][ https://www.cnblogs.com/shuisanya/p/16558056.html ]
 
-![](D:\JAVAIDEA\Blog\设计图片\Vue设计组件设计.png)
-
-
-
+![Vue设计组件设计](https://user-images.githubusercontent.com/109839622/184897291-d7fd4271-1ecc-47bc-8165-45a2279919b9.png)
 
 
 ## 数据库设计
 
-![](D:\JAVAIDEA\Blog\设计图片\数据库设计.png)
+![数据库设计](https://user-images.githubusercontent.com/109839622/184897527-b6a7059d-4de9-45a8-bee8-9b1b8dc05d4f.png)
 
 ## 后端Java SpringBoot
