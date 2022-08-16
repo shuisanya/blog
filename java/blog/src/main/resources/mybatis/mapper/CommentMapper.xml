@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mhy.blog.mapper.CommentMapper">
+
+    <!-- 开启缓存  -->
+    <cache readOnly="true"/>
+
+    <insert id="addComment">
+        insert into t_comment(comment_code, comment_name, comment_content, comment_time, blog_code)
+        values (#{commentCode},#{commentName},#{commentContent},#{commentTime},#{blog.code})
+    </insert>
+
+    <select id="queryCommentsByBlogCode" resultType="comment">
+        select comment_code,comment_content,comment_name,comment_time from t_comment where blog_code=#{blogCode}
+    </select>
+
+</mapper>

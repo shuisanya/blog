@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mhy.blog.mapper.LabelMapper">
+
+    <!-- 开启缓存  -->
+    <cache readOnly="true"/>
+
+    <insert id="addLabel">
+        insert into t_label(`label_code`,`label_name`,`label_create_time`,`label_update_time`)
+        values (#{labelCode},#{labelName},#{labelCreateTime},#{labelUpdateTime})
+    </insert>
+
+    <select id="queryLabelTotalCount" resultType="int">
+        select count(label_code) from t_label
+    </select>
+
+    <select id="queryLabels" resultType="label">
+        select label_code, label_name, label_create_time, label_update_time
+        from t_label
+        limit #{begin},#{pageSize}
+    </select>
+
+    <update id="updateLabel">
+        update t_label set
+        label_name=#{labelName},label_update_time=#{labelUpdateTime}
+        where label_code=#{labelCode}
+    </update>
+
+    <delete id="deleteLabel">
+        delete from t_label where label_code=#{labelCode}
+    </delete>
+
+    <select id="queryAllLabels" resultType="label">
+        select label_code,label_name from t_label
+    </select>
+
+    <select id="queryLabelsByCode" resultType="label">
+        select tl.label_code,tl.label_name from t_label tl
+        left join blog_with_label bwl on tl.label_code = bwl.label_code
+        where bwl.blog_code=#{code}
+    </select>
+
+    <delete id="deleteLabelWithBlog">
+        delete from blog_with_label where label_code=#{labelCode}
+    </delete>
+
+
+
+
+</mapper>

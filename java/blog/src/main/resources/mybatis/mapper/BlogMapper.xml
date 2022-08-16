@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mhy.blog.mapper.BlogMapper">
+
+    <!-- 开启缓存  -->
+    <cache readOnly="true"/>
+
+    <select id="queryBlogsByInfo" resultType="blog">
+        select title, code, create_time, read_num, recommend_num, `release` from t_blog tb
+        <if test="labelCode != null and labelCode != ''">
+            left join blog_with_label bwl on tb.code = bwl.blog_code
+        </if>
+        <where>
+            <if test="classifyCode != null and classifyCode != ''">
+                classify_code = #{classifyCode}
+            </if>
+            <if test="labelCode != null and labelCode != ''">
+                bwl.label_code = #{labelCode}
+            </if>
+            <if test="release != null and release != ''">
+                and `release`=#{release}
+            </if>
+        </where>
+    </select>
+
+    <insert id="addBlog">
+        insert into t_blog(`code`,`title`,`content`,`img`,`read_num`,`recommend_num`,
+                           `create_time`,`update_time`,`release`,
+                           `comment_is`,`user_code`,`classify_code`)
+        values (#{code},#{title},#{content},#{img},#{readNum},#{recommendNum},
+                #{createTime},#{updateTime},#{release},#{commentIs},
+                #{user.userCode},#{classify.classifyCode})
+    </insert>
+
+    <insert id="addBlogWithLabel">
+        insert into blog_with_label(`blog_code`,`label_code`)
+        values (#{blogCode},#{labelCode})
+    </insert>
+
+    <select id="queryBlogTotalCount" resultType="int">
+        select count(code)
+        from t_blog
+        <if test="labelCode != null and labelCode != ''">
+            left join blog_with_label bwl on t_blog.code = bwl.blog_code
+        </if>
+        where `release` = #{release}
+        <if test="classifyCode != null and classifyCode != ''">
+            and classify_code = #{classifyCode}
+        </if>
+        <if test="labelCode != null and labelCode != ''">
+            and bwl.label_code = #{labelCode}
+        </if>
+        <if test="searchInput != null and searchInput != ''">
+            and title like CONCAT(CONCAT('%',#{searchInput}),'%')
+        </if>
+    </select>
+
+    <select id="queryBlogs" resultType="blog">
+        select title, code, read_num, recommend_num, update_time,create_time,`release`,left(content,200) as content
+        from t_blog
+        <if test="labelCode != null and labelCode != ''">
+            left join blog_with_label bwl on t_blog.code = bwl.blog_code
+        </if>
+
+        where `release` = #{release}
+        <if test="classifyCode != null and classifyCode != ''">
+            and classify_code = #{classifyCode}
+        </if>
+
+        <if test="labelCode != null and labelCode != ''">
+            and bwl.label_code = #{labelCode}
+        </if>
+
+        <if test="searchInput != null and searchInput != ''">
+            and title like CONCAT(CONCAT('%',#{searchInput}),'%')
+        </if>
+
+        order by update_time DESC
+        limit ${begin},#{pageSize}
+    </select>
+
+    <select id="queryBlogByCode" resultMap="BlogWithClassify">
+        select tb.code,tb.title,tb.content,tb.`release` ,tb.img,tc.classify_code,tc.classify_name,
+               tb.update_time,tb.create_time,tb.read_num,tb.recommend_num
+        from t_blog tb left join t_classify tc on tb.classify_code = tc.classify_code
+        where code=#{code}
+    </select>
+    <resultMap id="BlogWithClassify" type="blog">
+        <id property="code" column="code"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="release" column="release"/>
+        <result property="img" column="img"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="readNum" column="read_num"/>
+        <result property="recommendNum" column="recommend_num"/>
+        <collection property="classify" ofType="classify">
+            <id property="classifyCode" column="classify_code"/>
+            <result property="classifyName" column="classify_name"/>
+        </collection>
+    </resultMap>
+
+    <update id="updateBlog">
+        update t_blog set
+        content=#{content},update_time=#{updateTime},title=#{title},img=#{img},
+        classify_code=#{classify.classifyCode},`release`=#{release}
+        where code=#{code}
+    </update>
+
+    <delete id="deleteBlogWithLabelByCode">
+        delete from blog_with_label where blog_code=#{code}
+    </delete>
+
+    <delete id="deleteBlog">
+        delete from t_blog where code=#{code}
+    </delete>
+
+    <update id="updateBlogClassifyByClassifyCode">
+        update t_blog set
+        classify_code=null
+        where classify_code=#{classifyCode}
+    </update>
+
+    <select id="queryMinData" resultType="date">
+        select min(create_time) as create_time from t_blog
+    </select>
+
+    <select id="queryDateBlogs" resultType="blog">
+        select title, code, create_time, read_num, recommend_num, `release` from t_blog
+        where year(create_time) = #{year}
+        <if test="release != null and release != ''">
+            and `release` = #{release}
+        </if>
+    </select>
+
+    <update id="updateBlogReadNums">
+        update t_blog set
+        read_num=read_num+1
+        where code=#{code}
+    </update>
+
+    <select id="queryBlogPre" resultType="blog">
+        select title,code from t_blog where `code` =
+        ( select `code` from t_blog where `update_time` &lt; #{date} order by `update_time` desc limit 1)
+    </select>
+
+    <select id="queryBlogNext" resultType="blog">
+        select title,code from t_blog where `code` =
+        ( select `code` from t_blog where `update_time` &gt; #{date} order by `update_time` asc limit 1)
+    </select>
+
+    <update id="recommendBlog">
+        update t_blog set
+        recommend_num = recommend_num+1
+        where code=#{code}
+    </update>
+
+    <select id="queryReadBlogRank" resultType="blog">
+        select title,code,read_num from t_blog where `release` = #{release} order by read_num desc limit #{begin},#{size}
+    </select>
+
+</mapper>

@@ -1,0 +1,80 @@
+server:
+  port: 8888
+  servlet:
+    context-path: /blog
+
+spring:
+  datasource:
+    #    数据的用户账号
+    username: root
+    #    数据的用户密码
+    password: 123456
+    #    url
+    url: jdbc:mysql://localhost:3306/blog?useSSL=true&useUnicode=true&characterEncoding=UTF-8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    #    更改连接的数据源
+    type: com.alibaba.druid.pool.DruidDataSource
+    #    下面是druid的配置
+    druid:
+      filters:
+        - stat
+        - wall
+        - log4j
+      #     开启过滤器一些驱动
+      filter:
+        stat:
+          enabled: true
+          log-slow-sql: true
+          merge-sql: true
+          slow-sql-millis: 2000
+        wall:
+          config:
+            multi-statement-allow: true
+      #     开启过滤器
+      web-stat-filter:
+        #     这个必须设置为true才可以实现bean的自动注入
+        enabled: true
+        exclusions:
+          -"*.js"
+          -"*.gif"
+          -"*.jpg"
+          -"*.png"
+          -"*.css"
+          -"*.ico"
+          -"/monitor/druid/*"
+      #     开启后台监控功能，但是现在加了监听器，使用必须开启监听器，否是无法显示sql监控
+      stat-view-servlet:
+        #     这里必须设置为true才可以实现bean的自动注入
+        enabled: true
+        #     后台登入账号   可以自己定义
+        login-username: 123456
+        #     后台登入密码   可以自己定义
+        login-password: 123456
+
+
+  servlet:
+    multipart:
+      enabled: true
+      max-request-size: 10MB
+      max-file-size: 10MB
+
+mybatis:
+  #  扫描的实体类包
+  type-aliases-package: com.mhy.blog.pojo
+  #  sql的xml文件的位置  在resources目录下
+  mapper-locations: classpath:mybatis/mapper/*.xml
+  configuration:
+    #    日志类
+    log-impl: org.apache.ibatis.logging.log4j2.Log4j2Impl
+    #    开启驼峰命名的转换
+    map-underscore-to-camel-case: true
+    cache-enabled: true
+
+
+#开启控制台的日志输出
+logging:
+  level:
+    com:
+      mhy:
+        blog:
+          mapper: debug
